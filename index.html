@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epipolar Geometry Sandbox</title>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+
+  <header id="app-header">
+    <span id="app-title">Epipolar Geometry Sandbox</span>
+    <button id="open-math" class="icon-button" type="button" aria-haspopup="dialog" aria-label="Explain the math">💡</button>
+  </header>
+
+  <main id="app-layout">
+
+    <!-- Left: Control Panel -->
+    <aside id="control-panel" aria-label="Control Panel">
+      <section class="panel-section">
+        <h3>Scene Point P</h3>
+        <label>X <input type="range" id="pt-x" min="-3" max="3" step="0.05" value="0.5" /></label>
+        <label>Y <input type="range" id="pt-y" min="-3" max="3" step="0.05" value="0.5" /></label>
+        <label>Z <input type="range" id="pt-z" min="1" max="8" step="0.05" value="3" /></label>
+      </section>
+
+      <section class="panel-section">
+        <h3>Camera 2 Pose</h3>
+        <label>ΔX <input type="range" id="cam2-tx" min="-3" max="3" step="0.05" value="1" /></label>
+        <label>ΔY <input type="range" id="cam2-ty" min="-3" max="3" step="0.05" value="0" /></label>
+        <label>ΔZ <input type="range" id="cam2-tz" min="-3" max="3" step="0.05" value="0" /></label>
+        <label>Yaw <input type="range" id="cam2-yaw" min="-45" max="45" step="0.5" value="0" /></label>
+        <label>Pitch <input type="range" id="cam2-pitch" min="-45" max="45" step="0.5" value="0" /></label>
+        <label>Roll <input type="range" id="cam2-roll" min="-45" max="45" step="0.5" value="0" /></label>
+      </section>
+
+      <section class="panel-section">
+        <h3>Camera Intrinsics</h3>
+        <label>Focal Length <input type="range" id="focal" min="100" max="800" step="10" value="400" /></label>
+        <span id="focal-val" class="val-display">400 px</span>
+      </section>
+
+      <section class="panel-section">
+        <h3>Presets</h3>
+        <button class="preset-btn" data-preset="stereo">Standard Stereo</button>
+        <button class="preset-btn" data-preset="forward">Forward Motion</button>
+        <button class="preset-btn" data-preset="rotation">Pure Rotation</button>
+      </section>
+
+      <section class="panel-section">
+        <label class="checkbox-label">
+          <input type="checkbox" id="trail-toggle" />
+          Show Pencil Trail
+        </label>
+        <button id="clear-trail" type="button">Clear Trail</button>
+      </section>
+    </aside>
+
+    <!-- Center: Visualization -->
+    <section id="viz-center" aria-label="Visualization">
+      <div id="view3d-wrap">
+        <span class="view-label">3D Global View</span>
+        <canvas id="canvas3d"></canvas>
+      </div>
+      <div id="views2d">
+        <div class="view2d-wrap" id="wrap-cam1">
+          <span class="view-label cam1-color">Cam 1 Image</span>
+          <canvas id="canvas2d-1"></canvas>
+        </div>
+        <div class="view2d-wrap" id="wrap-cam2">
+          <span class="view-label cam2-color">Cam 2 Image</span>
+          <canvas id="canvas2d-2"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Math Panel -->
+    <aside id="math-panel" aria-label="Math & Analytics">
+      <section class="panel-section">
+        <h3>Rotation R</h3>
+        <div id="matrix-R" class="matrix-display"></div>
+      </section>
+      <section class="panel-section">
+        <h3>Translation t</h3>
+        <div id="vec-t" class="matrix-display"></div>
+      </section>
+      <section class="panel-section">
+        <h3>Essential Matrix E</h3>
+        <div id="matrix-E" class="matrix-display"></div>
+      </section>
+      <section class="panel-section">
+        <h3>Fundamental Matrix F</h3>
+        <div id="matrix-F" class="matrix-display"></div>
+      </section>
+      <section class="panel-section" id="constraint-section">
+        <h3>Constraint Check</h3>
+        <div id="constraint-formula" class="constraint-box">
+          p₂ᵀ F p₁ = <span id="constraint-val">—</span>
+        </div>
+        <div id="degenerate-warn" class="warn-box" hidden>
+          ⚠ Degenerate configuration — epipolar geometry undefined.
+        </div>
+      </section>
+    </aside>
+
+  </main>
+
+  <!-- Math Modal -->
+  <div id="math-modal" role="dialog" aria-modal="true" aria-labelledby="math-title" hidden>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="math-title">Math Behind Epipolar Geometry</h2>
+        <div class="modal-actions">
+          <button id="language-toggle" class="modal-toggle" type="button">Eng/中</button>
+          <button id="close-math" class="modal-toggle" type="button" aria-label="Close">Close</button>
+        </div>
+      </div>
+      <div id="math-content" class="modal-body"></div>
+    </div>
+  </div>
+
+</body>
+</html>

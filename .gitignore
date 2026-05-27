@@ -1,0 +1,11 @@
+result
+result-*
+.direnv/
+node_modules/
+dist/
+*.swp
+*.swo
+.netrwhist
+.DS_Store
+Thumbs.db
+.codex

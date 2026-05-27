@@ -1,0 +1,7 @@
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  base: process.env.NODE_ENV === 'production' ? '/Epipolar-Geometry-View/' : '/',
+  server: { port: 8080 },
+  build: { outDir: 'dist' },
+});

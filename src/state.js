@@ -3,9 +3,9 @@ import { eulerToR, essentialMatrix, fundamentalMatrix, isDegenerate } from './ma
 const listeners = new Set();
 
 export const state = {
-  P: [0.5, 0.5, 3.0],
+  P: [-0.3, 0.3, 3.0],
   cam1: { center: [0, 0, 0], R: [1,0,0, 0,1,0, 0,0,1] },
-  cam2: { tx: 1.0, ty: 0.0, tz: 0.0, yaw: 0, pitch: 0, roll: 0, center: [1, 0, 0], R: null },
+  cam2: { tx: -1.0, ty: 0.0, tz: 0.0, yaw: 0, pitch: 0, roll: 0, center: [-1, 0, 0], R: null },
   focal: 400,
 
   // Derived
@@ -80,7 +80,7 @@ export function recompute() {
 }
 
 export const PRESETS = {
-  stereo:   { tx: 1,   ty: 0, tz:  0,  yaw:  0, pitch: 0, roll: 0, P: [0.5, 0.5, 3] },
-  forward:  { tx: 0,   ty: 0, tz: -1,  yaw:  0, pitch: 0, roll: 0, P: [0.2, 0.1, 4] },
-  rotation: { tx: 0.0001, ty: 0, tz: 0, yaw: 20, pitch: 0, roll: 0, P: [0.5, 0.5, 3] },
+  stereo:   { tx: -1,      ty: 0, tz:  0,  yaw:  0, pitch: 0, roll: 0, P: [-0.3, 0.3, 3] },
+  forward:  { tx:  0,      ty: 0, tz: -1,  yaw:  0, pitch: 0, roll: 0, P: [-0.2, 0.1, 4] },
+  rotation: { tx: -0.0001, ty: 0, tz:  0,  yaw: 20, pitch: 0, roll: 0, P: [-0.3, 0.3, 3] },
 };

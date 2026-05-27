@@ -106,8 +106,8 @@ export function init2DRenderers(canvas1, canvas2, stateRef) {
 
     ctx.save();
     ctx.translate(hw, hh);
-    // Y flips because screen Y is down but image Y is up
-    ctx.scale(1, -1);
+    // No Y-flip needed: cam1.R = Rx180 already negates camera-Y relative to world-Y,
+    // so v < 0 naturally means above-center in canvas coords (y increases downward).
 
     drawGrid(ctx, hw, hh, 50);
 

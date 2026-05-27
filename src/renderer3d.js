@@ -7,8 +7,8 @@ const C2_COLOR = 0x81A1C1;
 const PT_COLOR = 0xEBCB8B;
 const PLANE_COLOR = 0x5E81AC;
 
-// Grid spans ±5 in X and Z; place axes at the nearest corner to the initial camera
-const AXES_ORIGIN = new THREE.Vector3(-5, 0, -5);
+// Viewer at +Z looking in -Z; right=+X, far end=negative Z → right-far corner
+const AXES_ORIGIN = new THREE.Vector3(5, 0, -5);
 
 export function initRenderer3D(canvas, stateRef) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
@@ -26,13 +26,16 @@ export function initRenderer3D(canvas, stateRef) {
   scene.background = new THREE.Color(0x2E3440);
 
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 200);
-  camera.position.set(-3, 2.5, -4);
-  camera.lookAt(-0.5, 0, 1.5);
+  // Viewer on +Z side, looking toward -Z.
+  // right vector = (view_dir) × up = (0,0,-1)×(0,1,0) = (+1,0,0) = world +X  ✓
+  // forward in viewport = -Z  ✓
+  camera.position.set(-0.5, 3, 7);
+  camera.lookAt(-0.5, 0, 1);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.target.set(-0.5, 0, 1.5);
+  controls.target.set(-0.5, 0, 1);
 
   scene.add(new THREE.AmbientLight(0x4C566A, 1.2));
   const dLight = new THREE.DirectionalLight(0xECEFF4, 1.0);
@@ -169,7 +172,15 @@ export function initRenderer3D(canvas, stateRef) {
     const c1 = s.cam1.center;
     const c2 = s.cam2.center;
 
-    frustumA.position.set(...c1);
+    // Cam1 uses Rx180 = [[1,0,0],[0,-1,0],[0,0,-1]] so it looks in -Z
+    const Rx180 = [1, 0, 0,  0, -1, 0,  0, 0, -1];
+    frustumA.matrix.copy(new THREE.Matrix4().set(
+      Rx180[0], Rx180[3], Rx180[6], c1[0],
+      Rx180[1], Rx180[4], Rx180[7], c1[1],
+      Rx180[2], Rx180[5], Rx180[8], c1[2],
+      0,        0,        0,        1,
+    ));
+    frustumA.matrixAutoUpdate = false;
 
     const R = s.cam2.R || [1,0,0, 0,1,0, 0,0,1];
     frustumB.matrix.copy(new THREE.Matrix4().set(

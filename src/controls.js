@@ -1,4 +1,4 @@
-import { state, recompute, PRESETS } from './state.js';
+import { state, recompute, swapCameras, PRESETS } from './state.js';
 
 export function initControls() {
   // P is a plain array — bind individually to avoid overwriting the array reference
@@ -48,12 +48,14 @@ export function initControls() {
     });
   }
 
-  // Presets
+  // Presets — also reset cam1 back to origin so swap state is cleared
   document.querySelectorAll('.preset-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const preset = PRESETS[btn.dataset.preset];
       if (!preset) return;
       state.P = [...preset.P];
+      state.cam1.tx = 0; state.cam1.ty = 0; state.cam1.tz = 3;
+      state.cam1.yaw = 0; state.cam1.pitch = 0; state.cam1.roll = 0;
       state.cam2.tx = preset.tx;
       state.cam2.ty = preset.ty;
       state.cam2.tz = preset.tz;
@@ -64,6 +66,15 @@ export function initControls() {
       recompute();
     });
   });
+
+  // Swap cameras
+  const swapBtn = document.getElementById('swap-cameras');
+  if (swapBtn) {
+    swapBtn.addEventListener('click', () => {
+      swapCameras();
+      syncSliders();
+    });
+  }
 
   // Trail
   const trailToggle = document.getElementById('trail-toggle');

@@ -2,16 +2,13 @@ import { eulerToR, essentialMatrix, fundamentalMatrix, isDegenerate, mat3mul, ma
 
 const listeners = new Set();
 
-// Cam1 looks in -Z (toward smaller Z where P lives).
-// Rx180 = rotate 180° around X: keeps world X, flips Y and Z.
-// This means world +X stays image-right, and removing ctx.scale(1,-1)
-// in renderer2d.js gives the correct up/down orientation.
+// Base rotation for both cameras: looks in -Z, world +X = image right, world +Y = image up
 const CAM1_R = [1, 0, 0,  0, -1, 0,  0, 0, -1];
 
 export const state = {
   P: [-0.3, 0.3, 0.0],
-  cam1: { center: [0, 0, 3], R: CAM1_R },
-  cam2: { tx: -1.0, ty: 0.0, tz: 3.0, yaw: 0, pitch: 0, roll: 0, center: [-1, 0, 3], R: null },
+  cam1: { tx: 0, ty: 0, tz: 3, yaw: 0, pitch: 0, roll: 0, center: [0, 0, 3], R: CAM1_R },
+  cam2: { tx: 1.0, ty: 0.0, tz: 3.0, yaw: 0, pitch: 0, roll: 0, center: [1, 0, 3], R: null },
   focal: 400,
 
   R: null, t: null, E: null, F: null,
@@ -43,24 +40,23 @@ function projectToCam(P3, R, center, f) {
 export function recompute() {
   const { P, cam1, cam2, focal } = state;
 
-  // cam2 world rotation = cam1 base (CAM1_R) × user euler rotation
-  // When yaw=pitch=roll=0, cam2 is parallel to cam1.
+  // Both cameras share the same base rotation (CAM1_R) plus independent euler offsets
+  const R1 = eulerToR(cam1.yaw, cam1.pitch, cam1.roll);
+  const R_cam1 = mat3mul(CAM1_R, R1);
+  cam1.R = R_cam1;
+  cam1.center = [cam1.tx, cam1.ty, cam1.tz];
+
   const R2 = eulerToR(cam2.yaw, cam2.pitch, cam2.roll);
   const R_cam2 = mat3mul(CAM1_R, R2);
   cam2.R = R_cam2;
   cam2.center = [cam2.tx, cam2.ty, cam2.tz];
 
-  // Relative rotation between cam1 and cam2 (in cam1 frame):
-  // R_12 = R_cam2 × R_cam1^T = (CAM1_R × R2) × CAM1_R (CAM1_R is its own inverse)
-  const R_relative = mat3mul(mat3mul(CAM1_R, R2), mat3T(CAM1_R));
+  // R_relative = cam2.R × cam1.R^T = CAM1_R × R2 × R1^T × CAM1_R
+  const R_relative = mat3mul(mat3mul(mat3mul(CAM1_R, R2), mat3T(R1)), mat3T(CAM1_R));
 
-  // Relative translation expressed in cam1 coordinate frame
-  const delta = [
-    cam2.tx - cam1.center[0],
-    cam2.ty - cam1.center[1],
-    cam2.tz - cam1.center[2],
-  ];
-  const t_relative = mv(CAM1_R, delta);
+  // t in cam1 frame: cam1.R × (cam2.center - cam1.center)
+  const delta = [cam2.tx - cam1.tx, cam2.ty - cam1.ty, cam2.tz - cam1.tz];
+  const t_relative = mv(R_cam1, delta);
 
   state.R = R_relative;
   state.t = t_relative;
@@ -74,7 +70,7 @@ export function recompute() {
     state.F = null;
   }
 
-  state.p1 = projectToCam(P, CAM1_R, cam1.center, focal);
+  state.p1 = projectToCam(P, R_cam1, cam1.center, focal);
   state.p2 = projectToCam(P, R_cam2, cam2.center, focal);
 
   const F = state.F;
@@ -99,8 +95,19 @@ export function recompute() {
   notify();
 }
 
+export function swapCameras() {
+  const { cam1, cam2 } = state;
+  [cam1.tx, cam2.tx] = [cam2.tx, cam1.tx];
+  [cam1.ty, cam2.ty] = [cam2.ty, cam1.ty];
+  [cam1.tz, cam2.tz] = [cam2.tz, cam1.tz];
+  [cam1.yaw, cam2.yaw] = [cam2.yaw, cam1.yaw];
+  [cam1.pitch, cam2.pitch] = [cam2.pitch, cam1.pitch];
+  [cam1.roll, cam2.roll] = [cam2.roll, cam1.roll];
+  recompute();
+}
+
 export const PRESETS = {
-  stereo:   { tx: -1,      ty: 0, tz: 3,   yaw:  0, pitch: 0, roll: 0, P: [-0.3, 0.3, 0] },
+  stereo:   { tx:  1,      ty: 0, tz: 3,   yaw:  0, pitch: 0, roll: 0, P: [-0.3, 0.3, 0] },
   forward:  { tx:  0,      ty: 0, tz: 2,   yaw:  0, pitch: 0, roll: 0, P: [-0.2, 0.1, 0.5] },
-  rotation: { tx: -0.0001, ty: 0, tz: 3,   yaw: 20, pitch: 0, roll: 0, P: [-0.3, 0.3, 0] },
+  rotation: { tx:  0.0001, ty: 0, tz: 3,   yaw: 20, pitch: 0, roll: 0, P: [-0.3, 0.3, 0] },
 };

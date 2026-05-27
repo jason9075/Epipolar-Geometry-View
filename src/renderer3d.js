@@ -172,13 +172,12 @@ export function initRenderer3D(canvas, stateRef) {
     const c1 = s.cam1.center;
     const c2 = s.cam2.center;
 
-    // Cam1 uses Rx180 = [[1,0,0],[0,-1,0],[0,0,-1]] so it looks in -Z
-    const Rx180 = [1, 0, 0,  0, -1, 0,  0, 0, -1];
+    const R1 = s.cam1.R || [1, 0, 0,  0, -1, 0,  0, 0, -1];
     frustumA.matrix.copy(new THREE.Matrix4().set(
-      Rx180[0], Rx180[3], Rx180[6], c1[0],
-      Rx180[1], Rx180[4], Rx180[7], c1[1],
-      Rx180[2], Rx180[5], Rx180[8], c1[2],
-      0,        0,        0,        1,
+      R1[0], R1[3], R1[6], c1[0],
+      R1[1], R1[4], R1[7], c1[1],
+      R1[2], R1[5], R1[8], c1[2],
+      0,     0,     0,     1,
     ));
     frustumA.matrixAutoUpdate = false;
 

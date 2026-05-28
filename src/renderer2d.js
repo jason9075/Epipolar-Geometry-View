@@ -24,16 +24,17 @@ function drawEpipolarLine(ctx, line, halfW, halfH, color, thick = false) {
 
   ctx.beginPath();
   if (Math.abs(b) > Math.abs(a)) {
-    // solve for x at y edges
-    const y0 = -halfH, y1 = halfH;
-    const x0 = (-c - b * y0) / a;
-    const x1 = (-c - b * y1) / a;
-    ctx.moveTo(x0, y0);
-    ctx.lineTo(x1, y1);
-  } else {
+    // More horizontal: sweep x, solve y = (-c - ax) / b
     const x0 = -halfW, x1 = halfW;
     const y0 = (-c - a * x0) / b;
     const y1 = (-c - a * x1) / b;
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+  } else {
+    // More vertical: sweep y, solve x = (-c - by) / a
+    const y0 = -halfH, y1 = halfH;
+    const x0 = (-c - b * y0) / a;
+    const x1 = (-c - b * y1) / a;
     ctx.moveTo(x0, y0);
     ctx.lineTo(x1, y1);
   }

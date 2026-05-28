@@ -54,9 +54,8 @@ export function recompute() {
   // R_relative = cam2.R × cam1.R^T = CAM1_R × R2 × R1^T × CAM1_R
   const R_relative = mat3mul(mat3mul(mat3mul(CAM1_R, R2), mat3T(R1)), mat3T(CAM1_R));
 
-  // t in cam1 frame: cam1.R × (cam2.center - cam1.center)
-  const delta = [cam2.tx - cam1.tx, cam2.ty - cam1.ty, cam2.tz - cam1.tz];
-  const t_relative = mv(R_cam1, delta);
+  // E = [t]× R requires t expressed in cam2's frame: t = R_cam2 × (c1 - c2)
+  const t_relative = mv(R_cam2, [cam1.tx - cam2.tx, cam1.ty - cam2.ty, cam1.tz - cam2.tz]);
 
   state.R = R_relative;
   state.t = t_relative;
